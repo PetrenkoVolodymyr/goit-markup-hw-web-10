@@ -1,11 +1,23 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import TagForm, NoteForm
 from .models import Tag, Note
 
 
 # Create your views here.
 def main(request):
-    return render(request, 'noteapp/index.html')
+    notes = Note.objects.all()
+    return render(request, 'noteapp/index.html', {"notes": notes})
+
+
+def set_done(request, note_id):
+    Note.objects.filter(pk=note_id).update(done=True)
+    return redirect(to='noteapp:main')
+
+
+def delete_note(request, note_id):
+    Note.objects.get(pk=note_id).delete()
+    return redirect(to='noteapp:main')
+
 
 
 def tag(request):
@@ -37,3 +49,9 @@ def note(request):
             return render(request, 'noteapp/note.html', {"tags": tags, 'form': form})
 
     return render(request, 'noteapp/note.html', {"tags": tags, 'form': NoteForm()})
+
+
+
+def detail(request, note_id):
+    note = get_object_or_404(Note, pk=note_id)
+    return render(request, 'noteapp/detail.html', {"note": note})
